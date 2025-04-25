@@ -9,6 +9,7 @@ import androidx.compose.ui.*
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
+//Pantalla de ejercicio de ingles
 @Composable
 fun PhrasesScreen(navController: NavController) {
     val phrases = listOf(

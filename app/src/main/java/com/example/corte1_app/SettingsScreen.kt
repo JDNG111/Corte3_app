@@ -1,5 +1,6 @@
 package com.example.corte1_app.screens
 
+import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -18,9 +19,16 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.example.corte1_app.viewmodel.ThemeViewModel
+import com.example.corte1_app.LoginActivity
 import com.example.corte1_app.R
+import com.example.corte1_app.viewmodel.ThemeViewModel
+import com.google.firebase.auth.FirebaseAuth
 import java.io.File
+
+/**
+ * Esta es una pantalla principal, es de configuración donde el usuario puede actualizar
+ * su información de perfil, cambiar el color de fondo de la app y administrar las notificaciones.
+ */
 
 @Composable
 fun SettingsScreen(themeViewModel: ThemeViewModel) {
@@ -33,11 +41,34 @@ fun SettingsScreen(themeViewModel: ThemeViewModel) {
 
     val context = LocalContext.current
     val scrollState = rememberScrollState()
+    var showDialog by remember { mutableStateOf(false) }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let { themeViewModel.updateProfilePicture(it) }
+    }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    FirebaseAuth.getInstance().signOut()
+                    context.startActivity(Intent(context, LoginActivity::class.java))
+                    showDialog = false
+                }) {
+                    Text("Sí, cerrar sesión")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text("Cancelar")
+                }
+            },
+            title = { Text("¿Deseas cerrar sesión?") },
+            text = { Text("Esta acción te llevará de nuevo a la pantalla de inicio de sesión.") }
+        )
     }
 
     Column(
@@ -84,7 +115,6 @@ fun SettingsScreen(themeViewModel: ThemeViewModel) {
 
         Spacer(modifier = Modifier.height(20.dp))
         Text(text = "Mi Cuenta", style = MaterialTheme.typography.headlineMedium)
-
         Spacer(modifier = Modifier.height(20.dp))
 
         OutlinedTextField(
@@ -129,5 +159,9 @@ fun SettingsScreen(themeViewModel: ThemeViewModel) {
         )
 
         Spacer(modifier = Modifier.height(30.dp))
+
+        Button(onClick = { showDialog = true }) {
+            Text("Cerrar Sesión")
+        }
     }
 }

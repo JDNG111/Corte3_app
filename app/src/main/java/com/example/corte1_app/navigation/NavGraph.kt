@@ -24,6 +24,7 @@ fun NavGraph(context: Context, themeViewModel: ThemeViewModel) {
         composable("readingPractice") { ReadingPracticeScreen(navController) }
         composable("grammar") { GrammarScreen(navController) }
         composable("phrases") { PhrasesScreen(navController) }
+        composable("myDictionary") { MyDictionaryScreen(navController) }
 
 
     }

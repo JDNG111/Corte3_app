@@ -19,7 +19,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
 import com.example.corte1_app.R
 
-
+//Pantalla de inicio (Home) de la app
 @Composable
 fun HomeScreen(navController: NavController) {
     val scrollState = rememberScrollState()
@@ -47,7 +47,7 @@ fun HomeScreen(navController: NavController) {
         )
         Spacer(modifier = Modifier.height(10.dp))
 
-        // Imagen del logo
+            // Cargamos la imagen del logo
         Image(
             painter = painterResource(id = R.drawable.logo_appenglish),
             contentDescription = "App Logo",

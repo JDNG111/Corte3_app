@@ -1,5 +1,6 @@
 package com.example.corte1_app
 
+//Persistencia
 import android.content.Context
 import androidx.datastore.preferences.preferencesDataStore
 

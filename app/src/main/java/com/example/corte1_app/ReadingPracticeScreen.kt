@@ -9,6 +9,7 @@ import androidx.compose.ui.*
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
+//Pantalla de ejercicio de ingles
 @Composable
 fun ReadingPracticeScreen(navController: NavController) {
     val conversation = listOf(
@@ -31,11 +32,11 @@ fun ReadingPracticeScreen(navController: NavController) {
         Text(text = "Reading and Practice", style = MaterialTheme.typography.headlineMedium)
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Display manager's line
+        // Dialogo 1
         Text(text = conversation[index].first, style = MaterialTheme.typography.bodyLarge)
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Display response options
+        // Opciones a responder en el dialogo
         conversation[index].second.forEach { response ->
             Button(
                 onClick = {

@@ -15,6 +15,12 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
 
+/**
+ * A manera general, este codigo fu pensado y es el
+ * encargado de manejar la configuración del usuario
+ * y la persistencia de datos.
+ */
+
 class ThemeViewModel(application: Application) : AndroidViewModel(application) {
     private val context = application.applicationContext
 
@@ -37,9 +43,13 @@ class ThemeViewModel(application: Application) : AndroidViewModel(application) {
     val profilePicture: StateFlow<String?> = _profilePicture
 
     init {
+        // Carga los datos guardados cuando se inicializa el ViewModel
         viewModelScope.launch { loadUserData() }
     }
 
+    /**
+     * Aqui, hacemos la carga de los datos del usuario desde LiveData.
+     */
     private suspend fun loadUserData() {
         context.dataStore.data.collect { prefs ->
             _username.value = prefs[stringPreferencesKey("username")] ?: ""
@@ -51,26 +61,31 @@ class ThemeViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // Actualiza el nombre de usuario y lo guarda
     fun updateUsername(newUsername: String) {
         _username.value = newUsername
         saveToDataStore("username", newUsername)
     }
 
+    // Actualiza el idioma nativo del usuario y lo guarda
     fun updateProfession(newProfession: String) {
         _profession.value = newProfession
         saveToDataStore("profession", newProfession)
     }
 
+    // Cambia el modo de color (claro u oscuro) y lo guarda
     fun updateNativeLanguage(newLanguage: String) {
         _nativeLanguage.value = newLanguage
         saveToDataStore("nativeLanguage", newLanguage)
     }
 
+    // Activa o desactiva las notificaciones y lo guarda
     fun updateColor(color: String) {
         _selectedColor.value = color
         saveToDataStore("selectedColor", color)
     }
 
+    // Actualiza la foto de perfil del usuario.
     fun updateNotifications(enabled: Boolean) {
         _notificationsEnabled.value = enabled
         saveToDataStore("notificationsEnabled", enabled.toString())
@@ -102,6 +117,7 @@ class ThemeViewModel(application: Application) : AndroidViewModel(application) {
         return file.absolutePath
     }
 
+    // Elimina la foto de perfil del almacenamiento interno y borra la referencia
     fun deleteProfilePicture() {
         viewModelScope.launch {
             val file = File(context.filesDir, "profile_picture.jpg")

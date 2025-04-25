@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
+//Pantalla de ejercicio de ingles
 @Composable
 fun WritingScreen(navController: NavController) {
     val scrollState = rememberScrollState()
