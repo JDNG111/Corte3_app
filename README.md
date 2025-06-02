@@ -102,7 +102,7 @@ Pantalla donde el usuario puede cambiar su configuración.
 
 Clona este repositorio:
 
-git clone https://github.com/JDNG111/Corte2_app_Navarro.git
+git clone https://github.com/JDNG111/Corte3_app.git
 
 Abre el proyecto en Android Studio.
 
