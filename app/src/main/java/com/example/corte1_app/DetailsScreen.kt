@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
@@ -52,7 +53,7 @@ fun DetailsScreen(navController: NavController) {
                 color = MaterialTheme.colorScheme.primary
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
             // Ruta de aprendizaje
             LearningRouteButton(
@@ -113,33 +114,48 @@ fun DetailsScreen(navController: NavController) {
                 onClick = { navController.navigate("myDictionary") }
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            PathConnector()
 
-            Text(
-                text = "Coming Soon",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.secondary
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Botones deshabilitados con diseño similar pero grisáceo
-            DisabledLearningRouteButton(
-                title = "Listening",
-                description = "Practice your listening skills",
-                icon = Icons.Default.Settings
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            DisabledLearningRouteButton(
+            LearningRouteButton(
                 title = "AI Chat",
                 description = "Practice with an AI language partner",
-                icon = Icons.Default.Person
+                icon = Icons.Default.Person,
+                color = Color(0xFF607D8B),
+                onClick = { navController.navigate("chatBot") }
+            )
+
+            PathConnector()
+
+            LearningRouteButton(
+                title = "Map of Engineers",
+                description = "Explore engineering landmarks",
+                icon = Icons.Default.LocationOn,
+                color = Color(0xFF3F51B5),
+                onClick = { navController.navigate("mapLearning") }
+            )
+
+            PathConnector()
+
+            LearningRouteButton(
+                title = "Forum",
+                description = "Discuss topics with the community",
+                icon = Icons.Default.Create,
+                color = Color(0xFFCDDC39),
+                onClick = { navController.navigate("forum") }
+            )
+
+            PathConnector()
+
+            LearningRouteButton(
+                title = "Listening",
+                description = "Practice your listening skills",
+                icon = Icons.Default.Settings,
+                color = Color(0xFF8BC34A),
+                onClick = { navController.navigate("listening") }
             )
 
             Spacer(modifier = Modifier.height(24.dp))
+
         }
     }
 }
@@ -156,44 +172,48 @@ fun LearningRouteButton(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .height(100.dp)  // Aumentado de 80dp a 100dp
+            .height(140.dp)  // Botones mucho más grandes para acomodar el texto
             .padding(horizontal = 8.dp),
         shape = RoundedCornerShape(16.dp),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),  // Padding interno aumentado
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
         colors = ButtonDefaults.buttonColors(containerColor = color)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                modifier = Modifier.size(40.dp),  // Icono más grande
+                modifier = Modifier.size(40.dp),
                 tint = Color.White
             )
 
             Spacer(modifier = Modifier.width(16.dp))
 
             Column(
-                modifier = Modifier.weight(1f)  // Asegura que la columna ocupe todo el espacio disponible
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.SpaceEvenly  // Distribuir el espacio uniformemente
             ) {
                 Text(
                     text = title,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,  // Tamaño de texto aumentado
-                    style = MaterialTheme.typography.titleLarge,
+                    fontSize = 18.sp,  // Tamaño más conservador pero legible
                     color = Color.White,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis  // Maneja el desbordamiento con puntos suspensivos
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    lineHeight = 22.sp
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+
                 Text(
                     text = description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White.copy(alpha = 0.8f),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis  // Permite hasta 2 líneas con puntos suspensivos si es necesario
+                    fontSize = 14.sp,  // Tamaño apropiado para descripciones
+                    color = Color.White.copy(alpha = 0.9f),
+                    maxLines = 4,  // Más líneas disponibles para la descripción
+                    overflow = TextOverflow.Ellipsis,
+                    lineHeight = 18.sp
                 )
             }
 
@@ -202,8 +222,8 @@ fun LearningRouteButton(
             Icon(
                 imageVector = Icons.Default.KeyboardArrowRight,
                 contentDescription = null,
-                modifier = Modifier.size(32.dp),  // Flecha más grande
-                tint = Color.White.copy(alpha = 0.7f)
+                modifier = Modifier.size(28.dp),
+                tint = Color.White.copy(alpha = 0.8f)
             )
         }
     }
@@ -219,45 +239,49 @@ fun DisabledLearningRouteButton(
         onClick = { /* No implementado aún */ },
         modifier = Modifier
             .fillMaxWidth()
-            .height(100.dp)  // Aumentado de 80dp a 100dp
+            .height(140.dp)  // Botones mucho más grandes para acomodar el texto
             .padding(horizontal = 8.dp),
         shape = RoundedCornerShape(16.dp),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),  // Padding interno aumentado
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
         colors = ButtonDefaults.buttonColors(containerColor = Color.Gray.copy(alpha = 0.5f)),
         enabled = false
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                modifier = Modifier.size(40.dp),  // Icono más grande
+                modifier = Modifier.size(40.dp),
                 tint = Color.White.copy(alpha = 0.7f)
             )
 
             Spacer(modifier = Modifier.width(16.dp))
 
             Column(
-                modifier = Modifier.weight(1f)  // Asegura que la columna ocupe todo el espacio disponible
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.SpaceEvenly  // Distribuir el espacio uniformemente
             ) {
                 Text(
                     text = "$title (Coming Soon)",
                     fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,  // Tamaño de texto aumentado
-                    style = MaterialTheme.typography.titleMedium,
+                    fontSize = 18.sp,  // Tamaño más conservador pero legible
                     color = Color.White.copy(alpha = 0.7f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis  // Maneja el desbordamiento con puntos suspensivos
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    lineHeight = 22.sp
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+
                 Text(
                     text = description,
-                    style = MaterialTheme.typography.bodyMedium,
+                    fontSize = 14.sp,  // Tamaño apropiado para descripciones
                     color = Color.White.copy(alpha = 0.6f),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis  // Permite hasta 2 líneas con puntos suspensivos si es necesario
+                    maxLines = 4,  // Más líneas disponibles para la descripción
+                    overflow = TextOverflow.Ellipsis,
+                    lineHeight = 18.sp
                 )
             }
         }
@@ -268,9 +292,9 @@ fun DisabledLearningRouteButton(
 fun PathConnector() {
     Box(
         modifier = Modifier
-            .padding(vertical = 6.dp)  // Espaciado vertical aumentado
+            .padding(vertical = 6.dp)  // Espaciado reducido para compensar botones más grandes
             .width(4.dp)
-            .height(24.dp)
+            .height(20.dp)  // Altura reducida para mejor proporción
             .clip(RoundedCornerShape(4.dp))
             .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
     )

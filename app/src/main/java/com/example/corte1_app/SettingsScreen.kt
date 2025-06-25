@@ -1,10 +1,11 @@
 package com.example.corte1_app.screens
 
-import android.content.Intent
+import android.app.TimePickerDialog
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -21,14 +22,10 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.corte1_app.LoginActivity
 import com.example.corte1_app.R
+import com.example.corte1_app.notifications.NotificationScheduler
 import com.example.corte1_app.viewmodel.ThemeViewModel
-import com.google.firebase.auth.FirebaseAuth
 import java.io.File
-
-/**
- * Esta es una pantalla principal, es de configuración donde el usuario puede actualizar
- * su información de perfil, cambiar el color de fondo de la app y administrar las notificaciones.
- */
+import java.util.*
 
 @Composable
 fun SettingsScreen(themeViewModel: ThemeViewModel) {
@@ -38,10 +35,14 @@ fun SettingsScreen(themeViewModel: ThemeViewModel) {
     val selectedColor by themeViewModel.selectedColor.collectAsState()
     val notificationsEnabled by themeViewModel.notificationsEnabled.collectAsState()
     val profilePicture by themeViewModel.profilePicture.collectAsState()
+    val notificationHour by themeViewModel.notificationHour.collectAsState()
+    val notificationMinute by themeViewModel.notificationMinute.collectAsState()
 
     val context = LocalContext.current
     val scrollState = rememberScrollState()
     var showDialog by remember { mutableStateOf(false) }
+    var showImageDialog by remember { mutableStateOf(false) }
+    var showTimePicker by remember { mutableStateOf(false) }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -54,17 +55,13 @@ fun SettingsScreen(themeViewModel: ThemeViewModel) {
             onDismissRequest = { showDialog = false },
             confirmButton = {
                 TextButton(onClick = {
-                    FirebaseAuth.getInstance().signOut()
-                    context.startActivity(Intent(context, LoginActivity::class.java))
+                    com.google.firebase.auth.FirebaseAuth.getInstance().signOut()
+                    context.startActivity(android.content.Intent(context, LoginActivity::class.java))
                     showDialog = false
-                }) {
-                    Text("Sí, cerrar sesión")
-                }
+                }) { Text("Sí, cerrar sesión") }
             },
             dismissButton = {
-                TextButton(onClick = { showDialog = false }) {
-                    Text("Cancelar")
-                }
+                TextButton(onClick = { showDialog = false }) { Text("Cancelar") }
             },
             title = { Text("¿Deseas cerrar sesión?") },
             text = { Text("Esta acción te llevará de nuevo a la pantalla de inicio de sesión.") }
@@ -79,8 +76,8 @@ fun SettingsScreen(themeViewModel: ThemeViewModel) {
             .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Foto de Perfil", style = MaterialTheme.typography.headlineSmall)
-        Spacer(modifier = Modifier.height(10.dp))
+        Text("Foto de Perfil", style = MaterialTheme.typography.headlineSmall)
+        Spacer(Modifier.height(10.dp))
 
         val profileImage = remember(profilePicture) {
             profilePicture?.takeIf { it.isNotEmpty() }?.let { path ->
@@ -88,80 +85,112 @@ fun SettingsScreen(themeViewModel: ThemeViewModel) {
             } ?: R.drawable.default_profile
         }
 
-        AsyncImage(
-            model = ImageRequest.Builder(context)
-                .data(profileImage)
-                .crossfade(true)
-                .build(),
-            contentDescription = "Foto de perfil",
+        Box(
             modifier = Modifier
                 .size(120.dp)
                 .clip(CircleShape)
-        )
+                .clickable { showImageDialog = true }
+        ) {
+            AsyncImage(
+                model = ImageRequest.Builder(context).data(profileImage).crossfade(true).build(),
+                contentDescription = "Foto de perfil",
+                modifier = Modifier.fillMaxSize()
+            )
+        }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(Modifier.height(10.dp))
 
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Button(onClick = { imagePickerLauncher.launch("image/*") }) {
                 Text("Seleccionar/Cambiar foto")
             }
             if (!profilePicture.isNullOrEmpty()) {
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(Modifier.height(10.dp))
                 Button(onClick = { themeViewModel.deleteProfilePicture() }) {
                     Text("Eliminar foto")
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
-        Text(text = "Mi Cuenta", style = MaterialTheme.typography.headlineMedium)
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(Modifier.height(20.dp))
+        Text("Mi Cuenta", style = MaterialTheme.typography.headlineMedium)
+        Spacer(Modifier.height(20.dp))
 
-        OutlinedTextField(
-            value = username,
-            onValueChange = { themeViewModel.updateUsername(it) },
-            label = { Text("Nombre de usuario") }
-        )
+        OutlinedTextField(value = username, onValueChange = { themeViewModel.updateUsername(it) }, label = { Text("Nombre de usuario") })
+        Spacer(Modifier.height(10.dp))
+        OutlinedTextField(value = profession, onValueChange = { themeViewModel.updateProfession(it) }, label = { Text("Soy ingeniero") })
+        Spacer(Modifier.height(10.dp))
+        OutlinedTextField(value = nativeLanguage, onValueChange = { themeViewModel.updateNativeLanguage(it) }, label = { Text("Idioma nativo") })
+        Spacer(Modifier.height(10.dp))
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Text("Modo Oscuro")
+        Switch(checked = selectedColor == "Dark", onCheckedChange = { themeViewModel.updateColor(if (it) "Dark" else "Light") })
+        Spacer(Modifier.height(10.dp))
+        Text("Notificaciones")
+        Switch(checked = notificationsEnabled, onCheckedChange = { themeViewModel.updateNotifications(it) })
 
-        OutlinedTextField(
-            value = profession,
-            onValueChange = { themeViewModel.updateProfession(it) },
-            label = { Text("Soy ingeniero") }
-        )
+        Spacer(Modifier.height(10.dp))
+        Text("¿Quieres fijar tu propio recordatorio?", modifier = Modifier.clickable { showTimePicker = !showTimePicker })
 
-        Spacer(modifier = Modifier.height(10.dp))
+        if (showTimePicker) {
+            Spacer(Modifier.height(8.dp))
+            Text("Hora actual fijada: %02d:%02d".format(notificationHour, notificationMinute))
+            Spacer(Modifier.height(4.dp))
 
-        OutlinedTextField(
-            value = nativeLanguage,
-            onValueChange = { themeViewModel.updateNativeLanguage(it) },
-            label = { Text("Idioma nativo") }
-        )
+            Button(onClick = {
+                val calendar = Calendar.getInstance()
+                val initialHour = notificationHour
+                val initialMinute = notificationMinute
 
-        Spacer(modifier = Modifier.height(10.dp))
+                TimePickerDialog(
+                    context,
+                    { _, selectedHour, selectedMinute ->
+                        // Guardar en Firestore
+                        themeViewModel.updateNotificationTime(selectedHour, selectedMinute)
 
-        Text(text = "Modo Oscuro")
-        Switch(
-            checked = selectedColor == "Dark",
-            onCheckedChange = { isChecked ->
-                val newMode = if (isChecked) "Dark" else "Light"
-                themeViewModel.updateColor(newMode)
+                        // Programar nueva notificación
+                        NotificationScheduler(context).scheduledailyNotification(selectedHour, selectedMinute)
+
+                        // Ocultar el frame después de confirmar
+                        showTimePicker = false
+                    },
+                    initialHour,
+                    initialMinute,
+                    true
+                ).show()
+            }) {
+                Text("Confirmar notificación")
+            }
+
+
+            Spacer(Modifier.height(8.dp))
+            Button(onClick = {
+                themeViewModel.updateNotificationTime(19, 0)
+                NotificationScheduler(context).scheduledailyNotification(19, 0)
+                showTimePicker = false // opcional: ocultar panel después de cancelar
+            }) {
+                Text("Cancelar")
+            }
+
+        }
+
+        Spacer(Modifier.height(30.dp))
+        Button(onClick = { showDialog = true }) { Text("Cerrar Sesión") }
+    }
+
+    if (showImageDialog && !profilePicture.isNullOrEmpty()) {
+        AlertDialog(
+            onDismissRequest = { showImageDialog = false },
+            confirmButton = {
+                TextButton(onClick = { showImageDialog = false }) { Text("Cerrar") }
+            },
+            text = {
+                AsyncImage(
+                    model = ImageRequest.Builder(context).data(File(profilePicture!!)).crossfade(true).build(),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxWidth().height(300.dp)
+                )
             }
         )
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Text(text = "Notificaciones")
-        Switch(
-            checked = notificationsEnabled,
-            onCheckedChange = { themeViewModel.updateNotifications(it) }
-        )
-
-        Spacer(modifier = Modifier.height(30.dp))
-
-        Button(onClick = { showDialog = true }) {
-            Text("Cerrar Sesión")
-        }
     }
 }
